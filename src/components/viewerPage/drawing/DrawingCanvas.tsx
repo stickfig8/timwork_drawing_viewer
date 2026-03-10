@@ -1,5 +1,6 @@
 import CommonButton from "@/components/common/CommonButton";
 import { useDrawingCanvasZoomPan } from "@/hooks/useDrawingCanvasZoomPan";
+import { useDrawingMagnifier } from "@/hooks/useDrawingMagnifier";
 import type { FlatRow } from "@/types/controlTypes";
 
 type Props = {
@@ -11,27 +12,36 @@ export default function DrawingCanvas({ drawing }: Props) {
     scale,
     position,
     isDragging,
-
     containerRef,
-
     handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-
     initialize,
   } = useDrawingCanvasZoomPan();
 
-  //const baseScale = drawing.scale ?? 1;
-  //const normalizedScale = 1 / baseScale;
+  const {
+    showMagnifier,
+    setShowMagnifier,
+    imgRef,
+    magnifierRef,
+    handleMagnifierMove,
+  } = useDrawingMagnifier();
 
   return (
     <article
       className="relative w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
       onWheel={handleWheel}
-      onMouseMove={handleMouseMove}
+      onMouseMove={(e) => {
+        handleMouseMove(e);
+        handleMagnifierMove(e);
+      }}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseLeave={() => {
+        handleMouseUp();
+        setShowMagnifier(false);
+      }}
+      onMouseEnter={() => setShowMagnifier(true)}
     >
       <div
         ref={containerRef}
@@ -44,17 +54,30 @@ export default function DrawingCanvas({ drawing }: Props) {
         }}
       >
         <img
+          ref={imgRef}
           src={`/drawings/${drawing.image}`}
           className="max-w-full max-h-[90vh] object-contain select-none"
           draggable={false}
         />
       </div>
 
-      {(scale !== 1 || position.x !== 0 || position.y! !== 0) && (
-        <div className="absolute z-40 right-4 bottom-4">
+      <div className="absolute z-40 right-4 bottom-4 space-y-4 text-right">
+        {/* 돋보기 */}
+        {showMagnifier && (
+          <div
+            ref={magnifierRef}
+            className="w-48 h-48 border rounded-lg border-gray-400 shadow-lg pointer-events-none"
+            style={{
+              backgroundImage: `url(${new URL(`/drawings/${drawing.image}`, window.location.origin)})`,
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        )}
+        {/* 초기화 버튼 */}
+        {(scale !== 1 || position.x !== 0 || position.y !== 0) && (
           <CommonButton text="위치 초기화" onClick={initialize} />
-        </div>
-      )}
+        )}
+      </div>
     </article>
   );
 }

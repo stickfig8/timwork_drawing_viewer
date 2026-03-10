@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
 type Props = {
@@ -5,6 +6,7 @@ type Props = {
   width?: string;
   height?: string;
   onClick: () => void;
+  classname?: string;
 };
 
 export default function CommonButton({
@@ -12,11 +14,15 @@ export default function CommonButton({
   width = "20",
   height = "8",
   onClick,
+  classname = "",
 }: Props) {
   return (
     <Button
       onClick={onClick}
-      className={`w-${width} h-${height} mx-auto bg-[var(--main-orange)] hover:bg-[var(--main-blue)] cursor-pointer mt-1 transition-colors duration-300 ease-in-out`}
+      className={cn(
+        `w-${width} h-${height} mx-auto bg-[var(--main-orange)] hover:bg-[var(--main-blue)] cursor-pointer mt-1 transition-colors duration-300 ease-in-out`,
+        classname,
+      )}
     >
       {text}
     </Button>
